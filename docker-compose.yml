@@ -1,14 +1,36 @@
 services:
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.12.1
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mlflow
     container_name: mlflow
     ports:
       - "5000:5000"
     command: >
       mlflow server
       --backend-store-uri sqlite:////mlflow/mlflow.db
-      --default-artifact-root /mlruns
+      --artifacts-destination s3://mlflow-artifacts
+      --serve-artifacts
       --host 0.0.0.0
+    environment:
+      AWS_ACCESS_KEY_ID: minio
+      AWS_SECRET_ACCESS_KEY: minio123
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_S3_ADDRESSING_STYLE: path
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+
     volumes:
       - ./mlflow:/mlflow
-      - ./mlruns:/mlruns
+    depends_on:
+      - minio
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # MinIO Console UI
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server /data --console-address ":9001"
