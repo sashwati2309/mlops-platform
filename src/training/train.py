@@ -9,12 +9,12 @@ from sklearn.metrics import accuracy_score
 import joblib
 from pathlib import Path
 
-mlflow.set_tracking_uri("http://localhost:5000")
+# mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_experiment("iris-classifier")
 print("MLFLOW_TRACKING_URI =", mlflow.get_tracking_uri())
 
 def main(n_estimators: int, max_depth: int):
-    if mlflow.active_run() is not None:
-        mlflow.end_run()
+
     # 1. Load data (simple, deterministic dataset for now)
     iris = load_iris(as_frame=True)
     X = iris.data
@@ -36,17 +36,21 @@ def main(n_estimators: int, max_depth: int):
     preds = model.predict(X_test)
     acc = accuracy_score(y_test, preds)
 
-    # 4. MLflow tracking (explicit experiment)
-    mlflow.set_experiment("iris-classifier")
 
 
-    # 5. Save & log model artifact
+    # 4. Save & log model artifact
     with mlflow.start_run():
         mlflow.log_param("n_estimators", n_estimators)
         mlflow.log_param("max_depth", max_depth)
         mlflow.log_metric("accuracy", acc)
 
-        mlflow.sklearn.log_model(model, artifact_path="model")
+        # mlflow.sklearn.log_model(model, artifact_path="model")
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            artifact_path="model",
+            registered_model_name="IrisClassifier"
+        )
+
 
 
 

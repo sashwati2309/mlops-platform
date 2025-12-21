@@ -35,4 +35,16 @@ services:
       MINIO_ROOT_PASSWORD: minio123
     command: server /data --console-address ":9001"
     volumes:
-      - ./mlflow-data:/data
+      - D:/project/mlops-platform/minio-data:/data
+
+  trainer:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.train
+    depends_on:
+      - mlflow
+      - minio
+    env_file:
+      - .env
+    restart: "no"
+
