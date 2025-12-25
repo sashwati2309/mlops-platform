@@ -47,4 +47,14 @@ services:
     env_file:
       - .env
     restart: "no"
+  
+  promoter:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.promoter
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    depends_on:
+      - mlflow
+
 

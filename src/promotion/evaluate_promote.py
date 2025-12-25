@@ -1,14 +1,21 @@
+import os
 import mlflow
 from mlflow.tracking import MlflowClient
 
-TRACKING_URI = "http://localhost:5000"
+
 MODEL_NAME = "IrisClassifier"
 METRIC_NAME = "accuracy"
 
+TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")
+REGISTRY_URI = os.getenv("MLFLOW_REGISTRY_URI", TRACKING_URI)
+
 mlflow.set_tracking_uri(TRACKING_URI)
+mlflow.set_registry_uri(REGISTRY_URI)
 
-client = MlflowClient()
-
+client = MlflowClient(
+    tracking_uri=TRACKING_URI,
+    registry_uri=REGISTRY_URI
+)
 
 def get_latest_model_version():
     versions = client.search_model_versions(f"name='{MODEL_NAME}'")
