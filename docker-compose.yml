@@ -54,6 +54,20 @@ services:
       dockerfile: docker/Dockerfile.promoter
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - MLFLOW_REGISTRY_URI=http://mlflow:5000
+      - PROMOTION_MIN_DELTA=0.005
+    depends_on:
+      - mlflow
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - MLFLOW_REGISTRY_URI=http://mlflow:5000
     depends_on:
       - mlflow
 
